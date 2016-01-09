@@ -12,20 +12,29 @@ if [ $# -lt 1 ] ; then
   exit 1
 fi
 
-watchdir=${1}
+if [ -z "$AWS_DEFAULT_REGION" ] || [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] ; then
+  echo "Missing needed environmental variables. Aborting"
+  exit 1
+fi
 
-echo "Waiting for new files in ${watchdir}..."
-inotifywait ${watchdir} -m -q -e close_write --format %f . | while IFS= read -r file; do
-        # Do some work here using ${file} variable...  For example, to create
-        # a Redis key "newfile" with the contents being the filename:
-        #
-        # redis-cli -h 10.10.10.10 set newfile $(basename ${file})
-        #
-        # The "hostname" can be changed into an argument from the "Args"
-        # setting.  e.g. "redis_server=${2}", then "-h ${redis_server}"
+# Passed in by the Container Arg
+topic=${1}
+watchdir=${2}
 
-        # Output what inotify saw to the console log.  Log can be downloaded
-        # from the "Logs" tab for the running container.
-        echo "-------------------------------------------------------------"
-        echo "Saw new file ${file} in ${watchdir}"
-done
+/publish_fs_events.rb $watchdir $topic
+
+# echo "Waiting for new files in ${watchdir}..."
+# inotifywait ${watchdir} -m -q -e close_write --format %f . | while IFS= read -r file; do
+#         # Do some work here using ${file} variable...  For example, to create
+#         # a Redis key "newfile" with the contents being the filename:
+#         #
+#         # redis-cli -h 10.10.10.10 set newfile $(basename ${file})
+#         #
+#         # The "hostname" can be changed into an argument from the "Args"
+#         # setting.  e.g. "redis_server=${2}", then "-h ${redis_server}"
+
+#         # Output what inotify saw to the console log.  Log can be downloaded
+#         # from the "Logs" tab for the running container.
+#         echo "-------------------------------------------------------------"
+#         echo "Saw new file ${file} in ${watchdir}"
+# done
