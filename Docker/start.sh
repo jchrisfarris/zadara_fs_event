@@ -6,22 +6,26 @@ service ssh start
 # You can pass any number of command line arguments to this shell script using
 # the "Args" feature when creating the ZCS container.  This demo only has one
 # argument - the directory to watch for new files.
-if [ $# -lt 1 ] ; then
+if [ $# -lt 2 ] ; then
   echo "Usage:"
-  echo "  $0 <Watch Directory>"
+  echo "  $0 <topic> <Watch Directories>"
   exit 1
 fi
 
-if [ -z "$AWS_DEFAULT_REGION" ] || [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] ; then
+if [ -z "$AWS_REGION" ] || [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ] ; then
   echo "Missing needed environmental variables. Aborting"
   exit 1
 fi
 
-# Passed in by the Container Arg
-topic=${1}
-watchdir=${2}
+export AWS_REGION
+export AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY
 
-/publish_fs_events.rb $watchdir $topic
+topic=$1
+shift
+dirs=$@
+
+/publish_fs_events.rb $topic $dirs | tee -a /event.log
 
 # echo "Waiting for new files in ${watchdir}..."
 # inotifywait ${watchdir} -m -q -e close_write --format %f . | while IFS= read -r file; do

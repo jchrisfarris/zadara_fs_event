@@ -9,7 +9,7 @@ MAINTAINER Jeremy Brown "https://github.com/jwbrown77"
 # SSH is optional, but it's included here to make experimentation easier.  To
 # perform more useful functions, install the required program(s) you need 
 RUN apt-get update && apt-get install -y openssh-server inotify-tools ruby
-RUN gem install gem install aws-sdk
+RUN gem install aws-sdk
 
 # REMEMBER TO CHANGE ROOT PASSWORD AFTER LAUNCH
 RUN echo 'root:zadara' | chpasswd
@@ -22,6 +22,6 @@ RUN sed 's@session\s*required\s*pam_loginuid.so@session optional pam_loginuid.so
 EXPOSE 22
 
 ADD ./start.sh /start.sh
-ADD ./process_events.rb /process_events.rb
+ADD ./publish_fs_events.rb /publish_fs_events.rb
 
 CMD /start.sh
