@@ -7,9 +7,15 @@ require 'open3'
 # Things we need to get passed in
 SNS_Target_ARN, *DIRS = ARGV
 
+mydirs=""
+DIRS.each do |d|
+  mydirs = mydirs + " " + d
+end
+
+puts "Sending to Target #{SNS_Target_ARN}"
 
 # Assumes EC2 IAM role
-@sns = Aws::SNS::Client.new(region: Region)
+@sns = Aws::SNS::Client.new()
 
 def process_event(event) 
   timestamp, filename, event_types = event.split(':')
@@ -20,24 +26,33 @@ end
 
 
 def send_message(file, event, timestamp)
-  resp = @sns.publish({
-    target_arn: SNS_Target_ARN,
-    message: "{ filename: \"#{file}\", event: \"#{event}\", timestamp: \"#{timestamp}\" }",
-    subject: "#{event} on #{file}",
-    message_structure: "I dont know waht a message struct is",
-  })
-  puts resp.inspect
+  begin
+    resp = @sns.publish({
+      target_arn: SNS_Target_ARN,
+      message: "{ \"filename\": \"#{file}\", \"event\": \"#{event}\", \"timestamp\": \"#{timestamp}\" }",
+    })
+    puts resp.inspect
+  rescue Exception => e
+    puts "ERROR: #{e.message}"
+    exit 1
+  end
 end
 
+      #message_structure: "json",
 
 # These are inotifywait formatting paramaters
 TIMEFMT="%s"
 FMT="%T:%w%f:%e"
+EVENTS="close_write,moved_to,create,moved_from,delete"
 # sudo inotifywait -m -e $EVENTS --timefmt "$TIMEFMT" --format "$FMT" $DIRS
 
+COMMAND="inotifywait -m -e " + EVENTS + " --timefmt " + TIMEFMT + " --format " + FMT + " " + mydirs
+puts "Command: " + COMMAND
+
 # Open the shell script to watch for events 
-Open3.popen3("inotifywait -m -e $EVENTS --timefmt \"#{TIMEFMT}\" --format \"#{FMT}\" #{DIRS.to_s}") do |i,o,e,t |
+Open3.popen3(COMMAND) do |i,o,e,t |
   while line=o.gets do
+    line.chomp!
     puts "got: " + line
     process_event(line)
   end
