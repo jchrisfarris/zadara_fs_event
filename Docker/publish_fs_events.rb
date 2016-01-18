@@ -27,7 +27,7 @@ def send_message(file, event, timestamp)
   begin
     resp = @sns.publish({
       target_arn: SNS_Target_ARN,
-      message: "{ \"filename\": \"#{file}\", \"event\": \"#{event}\", \"timestamp\": \"#{timestamp}\" }",
+      message: '{ "filename": "#{file}", "event": "#{event}", "timestamp": "#{timestamp}" }',
     })
     # puts resp.inspect
   rescue Exception => e
