@@ -31,7 +31,7 @@ def send_message(file, event, timestamp)
       target_arn: SNS_Target_ARN,
       message: "{ \"filename\": \"#{file}\", \"event\": \"#{event}\", \"timestamp\": \"#{timestamp}\" }",
     })
-    puts resp.inspect
+    # puts resp.inspect
   rescue Exception => e
     puts "ERROR: #{e.message}"
     exit 1
