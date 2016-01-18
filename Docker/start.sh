@@ -27,18 +27,3 @@ dirs=$@
 
 /publish_fs_events.rb $topic $dirs | tee -a /event.log
 
-# echo "Waiting for new files in ${watchdir}..."
-# inotifywait ${watchdir} -m -q -e close_write --format %f . | while IFS= read -r file; do
-#         # Do some work here using ${file} variable...  For example, to create
-#         # a Redis key "newfile" with the contents being the filename:
-#         #
-#         # redis-cli -h 10.10.10.10 set newfile $(basename ${file})
-#         #
-#         # The "hostname" can be changed into an argument from the "Args"
-#         # setting.  e.g. "redis_server=${2}", then "-h ${redis_server}"
-
-#         # Output what inotify saw to the console log.  Log can be downloaded
-#         # from the "Logs" tab for the running container.
-#         echo "-------------------------------------------------------------"
-#         echo "Saw new file ${file} in ${watchdir}"
-# done

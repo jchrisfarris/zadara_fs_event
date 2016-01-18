@@ -12,6 +12,8 @@ DIRS.each do |d|
   mydirs = mydirs + " " + d
 end
 
+puts "Sending to Target #{SNS_Target_ARN}"
+
 # Assumes EC2 IAM role
 @sns = Aws::SNS::Client.new()
 
@@ -36,6 +38,7 @@ def send_message(file, event, timestamp)
   end
 end
 
+      #message_structure: "json",
 
 # These are inotifywait formatting paramaters
 TIMEFMT="%s"
